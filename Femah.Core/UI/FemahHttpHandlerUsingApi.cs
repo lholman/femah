@@ -1,13 +1,14 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Web;
 using System.Web.UI;
 
 namespace Femah.Core.UI
 {
-    internal sealed class FemahHttpHandler : IHttpHandler
+    internal sealed class FemahHttpHandlerUsingApi : IHttpHandler
     {
         private const string _enableFeatureAction = "enablefeature";
         private const string _setSwitchTypeAction = "setswitchtype";
@@ -15,11 +16,33 @@ namespace Femah.Core.UI
 
         public void ProcessRequest(HttpContext context)
         {
-            string name;
+            if (context.Request.Path.Contains("assets/"))
+            {
+                //Render static embedded files
+                context.Response.ContentType = "text/javascript";
+                StreamReader streamReader;
+
+                try
+                {
+                    Assembly assembly = Assembly.GetExecutingAssembly();
+                    var relativeResourceLocation = context.Request.Path.Replace("/femah.axd", "").Replace("/", ".");
+                    var fullResourceLocation = string.Format("{0}{1}", "Femah.Core.UI", relativeResourceLocation);
+                    streamReader = new StreamReader(assembly.GetManifestResourceStream(fullResourceLocation));
+                }
+                catch (Exception)
+                {
+                    return;
+                }
+
+                var textAsset = streamReader.ReadToEnd();
+                context.Response.Write(textAsset);
+                return;
+            }
 
             var action = context.Request.QueryString["action"];
             if (action != null)
             {
+                string name;
                 switch (action)
                 {
                     case _enableFeatureAction:
@@ -59,6 +82,7 @@ namespace Femah.Core.UI
                 context.Response.Redirect(context.Request.Url.AbsolutePath);
                 return;
             }
+
 
             var stringWriter = new StringWriter();
             var htmlTextWriter = context.Request.Browser.CreateHtmlTextWriter(stringWriter);
@@ -108,11 +132,28 @@ namespace Femah.Core.UI
                 writer.RenderBeginTag(HtmlTextWriterTag.Table);
                 foreach (var feature in features.OrderBy(f => f.Name))
                 {
+                    //Require an additional backbone.js template here for features
                     RenderFeatureRow(writer, feature);
                 }
                 writer.RenderEndTag(/* Table */);
             }
+            //Note, a wonderful convention of escaping numbers with an underscore is required in Manifest Resource names (i.e. embedded 
+            //resources) retrieved in this way, we could pass this dynamically but I figure it's better to keep it obvious in the script references.
+            //writer.Write("<script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js\" type=\"text/javascript\"></script>");
+            //writer.Write("<script src=\"http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.3.3/underscore-min.js\" type=\"text/javascript\"></script>");
+            //writer.Write("<script src=\"http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.2/backbone-min.js\" type=\"text/javascript\"></script>");
 
+            //The below combinations (latest of each framework/library) doesn't seem to bind a view
+//            writer.Write("<script src=\"femah.axd/assets/libs/jquery/_1._11._0/jquery-min.js\" type=\"text/javascript\"></script>");
+//            writer.Write("<script src=\"femah.axd/assets/libs/underscore.js/_1._6._0/underscore-min.js\" type=\"text/javascript\"></script>");
+//            writer.Write("<script src=\"femah.axd/assets/libs/backbone.js/_1._1._2/backbone-min.js\" type=\"text/javascript\"></script>");
+
+            writer.Write("<script src=\"femah.axd/assets/libs/jquery/_1._7._2/jquery-min.js\" type=\"text/javascript\"></script>");
+            writer.Write("<script src=\"femah.axd/assets/libs/underscore.js/_1._3._3/underscore-min.js\" type=\"text/javascript\"></script>");
+            writer.Write("<script src=\"femah.axd/assets/libs/backbone.js/_0._9._2/backbone-min.js\" type=\"text/javascript\"></script>");
+            
+            writer.Write("<script src=\"femah.axd/assets/app/models/featureswitchtype.js\" type=\"text/javascript\"></script>");
+            writer.Write("<script src=\"femah.axd/assets/app/app.js\" type=\"text/javascript\"></script>");
             writer.RenderEndTag(/* Body */);
             writer.RenderEndTag(/* Html */);
             writer.EndRender();
@@ -136,26 +177,23 @@ namespace Femah.Core.UI
             writer.RenderBeginTag(HtmlTextWriterTag.Td);
             writer.Write(feature.GetType().Name);
 
-            var switchTypes = Core.Femah.AllSwitchTypes();
-            if (switchTypes.Count >= 2)
-            {
-                writer.AddAttribute("action", "/femah.axd");
-                writer.RenderBeginTag(HtmlTextWriterTag.Form);
-                writer.Write(String.Format("<input type='hidden' name='action' value='{0}'></input>", _setSwitchTypeAction));
-                writer.Write(String.Format("<input type='hidden' name='name' value='{0}'></input>", feature.Name));
-                writer.AddAttribute(HtmlTextWriterAttribute.Name, "switchtype");
-                writer.RenderBeginTag(HtmlTextWriterTag.Select);
-                foreach (var switchType in switchTypes)
-                {
-                    writer.AddAttribute(HtmlTextWriterAttribute.Value, switchType.AssemblyQualifiedName);
-                    writer.RenderBeginTag(HtmlTextWriterTag.Option);
-                    writer.Write(switchType.Name);
-                    writer.RenderEndTag(/* Option */);
-                }
-                writer.RenderEndTag(/* Select */);
-                writer.Write("<input type='submit' value='Change'></input>");
-                writer.RenderEndTag(/* Form */);
-            }
+            writer.AddAttribute("action", "/femah.axd");
+            writer.RenderBeginTag(HtmlTextWriterTag.Form);
+            writer.Write("<input type='hidden' name='action' value='{0}'></input>", _setSwitchTypeAction);
+            writer.Write("<input type='hidden' name='name' value='{0}'></input>", feature.Name);
+
+            writer.AddAttribute(HtmlTextWriterAttribute.Id, "featureswitchtypes");
+            writer.RenderBeginTag(HtmlTextWriterTag.Select);
+
+            //The help of a backbone.js view template here
+            writer.Write("<script type=\"text/html\" id=\"template-featureswitchtypes\">");
+            writer.Write("<option value=\"<%= FeatureSwitchType %>\"><%= Name %></option>");
+            writer.Write("</script>");
+
+            writer.RenderEndTag(/* Select */);
+            writer.Write("<input type='submit' value='Change'></input>");
+            writer.RenderEndTag(/* Form */);
+
             writer.RenderEndTag(/* Td */);
 
             // Enabled or disabled.
@@ -164,18 +202,18 @@ namespace Femah.Core.UI
 
             writer.AddAttribute("action", "/femah.axd");
             writer.RenderBeginTag(HtmlTextWriterTag.Form);
-            writer.Write(String.Format("<input type='hidden' name='action' value='{0}'></input>", _enableFeatureAction));
-            writer.Write(String.Format("<input type='hidden' name='name' value='{0}'></input>", feature.Name));
-            writer.Write(String.Format("<input type='hidden' name='enabled' value='{0}'></input>", !feature.IsEnabled));
-            writer.Write(String.Format("<input type='submit' value='{0}'></input>", feature.IsEnabled ? "Disable" : "Enable"));
+            writer.Write("<input type='hidden' name='action' value='{0}'></input>", _enableFeatureAction);
+            writer.Write("<input type='hidden' name='name' value='{0}'></input>", feature.Name);
+            writer.Write("<input type='hidden' name='enabled' value='{0}'></input>", !feature.IsEnabled);
+            writer.Write("<input type='submit' value='{0}'></input>", feature.IsEnabled ? "Disable" : "Enable");
             writer.RenderEndTag(/* Form */);
             writer.RenderEndTag(/* Td */);
 
             // Custom attributes.
             writer.RenderBeginTag(HtmlTextWriterTag.Td);
             writer.RenderBeginTag(HtmlTextWriterTag.Form);
-            writer.Write(String.Format("<input type='hidden' name='name' value='{0}'></input>", feature.Name));
-            writer.Write(String.Format("<input type='hidden' name='action' value='{0}'></input>", _setCustomAttributesAction));
+            writer.Write("<input type='hidden' name='name' value='{0}'></input>", feature.Name);
+            writer.Write("<input type='hidden' name='action' value='{0}'></input>", _setCustomAttributesAction);
             feature.RenderUi(writer);
             writer.RenderEndTag(/* Form*/);
             writer.RenderEndTag(/* Td */);

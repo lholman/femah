@@ -251,17 +251,15 @@ namespace Femah.Core
             return types.Where(t => t.GetInterfaces().Contains(typeof (IFeatureSwitch)) && !t.IsAbstract).ToList();
         }
 
-       
         /// <summary>
         /// Log that an exception was thrown while testing if a particular feature switch was on.
         /// </summary>
         /// <param name="feature">Name of the feature switch</param>
         /// <param name="e">The exception that was thrown.</param>
-        private static void LogException( string feature, Exception e )
+        public static void LogException(string feature, Exception e)
         {
             // TODO - Log exceptions according to feature name.
         }
-
         #endregion
     }
 }
