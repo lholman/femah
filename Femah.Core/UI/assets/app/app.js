@@ -1,21 +1,28 @@
-Femah.FeatureSwitchTypeView = Backbone.View.extend({
-    el: "#featureswitchtypes",
+Femah ={
 
-    template: _.template($('#template-featureswitchtypes').html()),
+    init: function () {
 
-    render: function () {
-        _.each(this.model.models, function (featureSwitchType) {
-            var featureSwitchTypeTemplate = this.template(featureSwitchType.toJSON());
-            $(this.el).append(featureSwitchTypeTemplate);
-        }, this);
+        //data
+        //Femah.featureSwitchTypes = new Femah.FeatureSwitchTypeCollection();
+        Femah.featureSwitches = new Femah.FeatureSwitchCollection();
 
-        return this;
+        //views
+        //Femah.featureSwitchTypeList = new Femah.FeatureSwitchTypesView({ collection: Femah.featureSwitchTypes });
+        Femah.featureSwitchList = new Femah.FeatureSwitchesView({ collection: Femah.featureSwitches });
+
+        Femah.start();
+    },
+    start: function () {
+
+        //Femah.featureSwitchTypes.fetch();
+        Femah.featureSwitches.fetch();
+
     }
-});
+}
 
-var featureSwitchTypes = new Femah.FeatureSwitchTypes();
-var featureSwitchTypesView = new Femah.FeatureSwitchTypeView({ model: featureSwitchTypes });
-featureSwitchTypes.fetch();
-featureSwitchTypes.bind('reset', function () {
-    featureSwitchTypesView.render();
-});
+
+
+
+
+
+

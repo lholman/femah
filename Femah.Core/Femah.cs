@@ -115,7 +115,7 @@ namespace Femah.Core
         {
             var featureSwitch = _provider.Get(name);
             if (featureSwitch != null)
-            {
+            {   
                 featureSwitch.IsEnabled = enabled;
                 _provider.Save(featureSwitch);
             }
