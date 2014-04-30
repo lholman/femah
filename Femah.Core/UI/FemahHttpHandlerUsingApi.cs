@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Web;
 using System.Web.UI;
@@ -183,11 +182,8 @@ namespace Femah.Core.UI
                 writer.RenderEndTag(/* Tr */);
                 writer.Write("</script>");
                 writer.RenderEndTag(/* Div */);
-
             
             }
-            //Note, a wonderful convention of escaping numbers with an underscore is required in Manifest Resource names (i.e. embedded 
-            //resources) retrieved in this way, we could pass this dynamically but I figure it's better to keep it obvious in the script references.
 
             //The below combinations (latest of each framework/library) doesn't seem to bind a view
 //            writer.Write("<script src=\"femah.axd/assets/libs/jquery/_1._11._0/jquery-min.js\" type=\"text/javascript\"></script>");
@@ -195,6 +191,8 @@ namespace Femah.Core.UI
 //            writer.Write("<script src=\"femah.axd/assets/libs/underscore.js/_1._6._0/underscore.js\" type=\"text/javascript\"></script>");
 //            writer.Write("<script src=\"femah.axd/assets/libs/backbone.js/_1._1._2/backbone-min.js\" type=\"text/javascript\"></script>");
 
+            //Note, a wonderful convention of escaping numbers with an underscore is required in Manifest Resource names (i.e. embedded 
+            //resources) retrieved in this way, we could pass this dynamically but I figure it's better to keep it obvious in the script references.
             writer.Write("<script src=\"femah.axd/assets/libs/jquery/_1._7._2/jquery-min.js\" type=\"text/javascript\"></script>");
             writer.Write("<script src=\"femah.axd/assets/libs/underscore.js/_1._3._3/underscore-min.js\" type=\"text/javascript\"></script>");
             writer.Write("<script src=\"femah.axd/assets/libs/backbone.js/_0._9._2/backbone-min.js\" type=\"text/javascript\"></script>");
@@ -207,66 +205,5 @@ namespace Femah.Core.UI
             writer.EndRender();
         }
 
-        /// <summary>
-        /// Render a single feature row to the table of features.
-        /// </summary>
-        /// <param name="writer">A <see cref="HtmlTextWriter"/> to use to render the HTML.</param>
-        /// <param name="feature">The <see cref="IFeatureSwitch"/> to render.</param>
-        private void RenderFeatureRow(HtmlTextWriter writer, IFeatureSwitch feature)
-        {
-            writer.RenderBeginTag(HtmlTextWriterTag.Tr);
-
-            // Feature name.
-            writer.RenderBeginTag(HtmlTextWriterTag.Td);
-            writer.Write(feature.Name);
-            writer.RenderEndTag(/* Td */);
-
-            // Feature type.
-            writer.RenderBeginTag(HtmlTextWriterTag.Td);
-            writer.Write(feature.GetType().Name);
-
-            writer.AddAttribute("action", "/femah.axd");
-            writer.RenderBeginTag(HtmlTextWriterTag.Form);
-            writer.Write("<input type='hidden' name='action' value='{0}'></input>", _setSwitchTypeAction);
-            writer.Write("<input type='hidden' name='name' value='{0}'></input>", feature.Name);
-
-            writer.AddAttribute(HtmlTextWriterAttribute.Id, "featureswitchtypes");
-            writer.RenderBeginTag(HtmlTextWriterTag.Select);
-
-            //The help of a backbone.js view template here
-            writer.Write("<script type=\"text/html\" id=\"template-featureswitchtypes\">");
-            writer.Write("<option value=\"<%= FeatureSwitchType %>\"><%= Name %></option>");
-            writer.Write("</script>");
-
-            writer.RenderEndTag(/* Select */);
-            writer.Write("<input type='submit' value='Change'></input>");
-            writer.RenderEndTag(/* Form */);
-
-            writer.RenderEndTag(/* Td */);
-
-            // Enabled or disabled.
-            writer.RenderBeginTag(HtmlTextWriterTag.Td);
-            writer.Write(feature.IsEnabled ? "Enabled" : "Disabled");
-
-            writer.AddAttribute("action", "/femah.axd");
-            writer.RenderBeginTag(HtmlTextWriterTag.Form);
-            writer.Write("<input type='hidden' name='action' value='{0}'></input>", _enableFeatureAction);
-            writer.Write("<input type='hidden' name='name' value='{0}'></input>", feature.Name);
-            writer.Write("<input type='hidden' name='enabled' value='{0}'></input>", !feature.IsEnabled);
-            writer.Write("<input type='submit' value='{0}'></input>", feature.IsEnabled ? "Disable" : "Enable");
-            writer.RenderEndTag(/* Form */);
-            writer.RenderEndTag(/* Td */);
-
-            // Custom attributes.
-            writer.RenderBeginTag(HtmlTextWriterTag.Td);
-            writer.RenderBeginTag(HtmlTextWriterTag.Form);
-            writer.Write("<input type='hidden' name='name' value='{0}'></input>", feature.Name);
-            writer.Write("<input type='hidden' name='action' value='{0}'></input>", _setCustomAttributesAction);
-            feature.RenderUi(writer);
-            writer.RenderEndTag(/* Form*/);
-            writer.RenderEndTag(/* Td */);
-
-            writer.RenderEndTag(/* Tr */);
-        }
     }
 }
