@@ -3,7 +3,7 @@ Femah ={
     init: function () {
 
         //data
-        //Femah.featureSwitchTypes = new Femah.FeatureSwitchTypeCollection();
+        Femah.featureSwitchTypes = new Femah.FeatureSwitchTypeCollection();
         Femah.featureSwitches = new Femah.FeatureSwitchCollection();
 
         //views
@@ -14,7 +14,7 @@ Femah ={
     },
     start: function () {
 
-        //Femah.featureSwitchTypes.fetch();
+        Femah.featureSwitchTypes.fetch();
         Femah.featureSwitches.fetch();
 
     }

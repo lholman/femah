@@ -79,7 +79,8 @@ Femah.FeatureSwitchesView = Backbone.View.extend({
     tagName: "table",
     render: function () {
         var els = [];
-        var featureTypesList = ["Simple", "Percentage", "Other"];
+        //var featureTypesList = ["Simple", "Percentage", "Other"];
+        var featureTypesList = Femah.featureSwitchTypes.toJSON();
         this.collection.each(function (item) {
             var itemView = new Femah.FeatureSwitchView({ model: item, featureTypesList: featureTypesList });
             els.push(itemView.render().el);

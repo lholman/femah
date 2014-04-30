@@ -147,9 +147,10 @@ namespace Femah.Core.UI
                             writer.AddAttribute(HtmlTextWriterAttribute.Id, "featureswitchtypes");
                             writer.AddAttribute(HtmlTextWriterAttribute.Name, "switchtype");
                                 writer.RenderBeginTag(HtmlTextWriterTag.Select);
-                                    writer.Write("<% debugger; %><% _.each(featureTypes, function (item) { %>");
+                                    writer.Write("<% _.each(featureTypes, function (item) { %>");
                                         writer.RenderBeginTag(HtmlTextWriterTag.Option);
-                                        writer.Write("<%= item %>");
+                                        //writer.Write("<% debugger; %>");
+                                        writer.Write("<%= item.Name %>");
                                         writer.RenderEndTag(/* Option */);
                                     writer.Write("<% }); %>");
                                 writer.RenderEndTag(/* Select */);
