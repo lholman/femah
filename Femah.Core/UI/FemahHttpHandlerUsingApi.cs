@@ -148,7 +148,6 @@ namespace Femah.Core.UI
                                 writer.RenderBeginTag(HtmlTextWriterTag.Select);
                                     writer.Write("<% _.each(featureTypes, function (item) { %>");
                                         writer.RenderBeginTag(HtmlTextWriterTag.Option);
-                                        //writer.Write("<% debugger; %>");
                                         writer.Write("<%= item.Name %>");
                                         writer.RenderEndTag(/* Option */);
                                     writer.Write("<% }); %>");
@@ -164,7 +163,9 @@ namespace Femah.Core.UI
                         writer.RenderBeginTag(HtmlTextWriterTag.Form);
                             writer.Write("<input type='hidden' name='action' value='{0}'></input>", _enableFeatureAction);
                             writer.Write("<input type='hidden' name='name' value='{0}'></input>", "<%= model.Name %>");
-                            writer.Write("<input type='hidden' name='enabled' value='{0}'></input>", "<%= !model.IsEnabled %>");
+                            writer.Write("<input type='hidden' id='featureswitch-status-enabled' name='featureswitch-status-enabled' value='{0}'></input>", "<%= !model.IsEnabled %>");
+                            //writer.Write("<% debugger; %>");
+                            //writer.Write("<input type='hidden' id='updated-model' name='model' value='{0}'></input>", "<%= JSON.stringify(model) %>");
                             writer.Write("<input type='submit' value='{0}'></input>", "<%= model.IsEnabled ? 'Disable' : 'Enable' %>");
                         writer.RenderEndTag(/* Form */);
                     writer.RenderEndTag(/* Td */);
@@ -185,17 +186,16 @@ namespace Femah.Core.UI
             
             }
 
-            //The below combinations (latest of each framework/library) doesn't seem to bind a view
-//            writer.Write("<script src=\"femah.axd/assets/libs/jquery/_1._11._0/jquery-min.js\" type=\"text/javascript\"></script>");
-//            //writer.Write("<script src=\"femah.axd/assets/libs/underscore.js/_1._6._0/underscore-min.js\" type=\"text/javascript\"></script>");
-//            writer.Write("<script src=\"femah.axd/assets/libs/underscore.js/_1._6._0/underscore.js\" type=\"text/javascript\"></script>");
-//            writer.Write("<script src=\"femah.axd/assets/libs/backbone.js/_1._1._2/backbone-min.js\" type=\"text/javascript\"></script>");
-
             //Note, a wonderful convention of escaping numbers with an underscore is required in Manifest Resource names (i.e. embedded 
             //resources) retrieved in this way, we could pass this dynamically but I figure it's better to keep it obvious in the script references.
             writer.Write("<script src=\"femah.axd/assets/libs/jquery/_1._7._2/jquery-min.js\" type=\"text/javascript\"></script>");
-            writer.Write("<script src=\"femah.axd/assets/libs/underscore.js/_1._3._3/underscore-min.js\" type=\"text/javascript\"></script>");
-            writer.Write("<script src=\"femah.axd/assets/libs/backbone.js/_0._9._2/backbone-min.js\" type=\"text/javascript\"></script>");
+//            writer.Write("<script src=\"femah.axd/assets/libs/jquery/_1._11._0/jquery-min.js\" type=\"text/javascript\"></script>");
+            writer.Write("<script src=\"femah.axd/assets/libs/underscore.js/_1._6._0/underscore-min.js\" type=\"text/javascript\"></script>");
+            writer.Write("<script src=\"femah.axd/assets/libs/backbone.js/_1._1._2/backbone-min.js\" type=\"text/javascript\"></script>");
+
+//            writer.Write("<script src=\"femah.axd/assets/libs/jquery/_1._7._2/jquery-min.js\" type=\"text/javascript\"></script>");
+//            writer.Write("<script src=\"femah.axd/assets/libs/underscore.js/_1._3._3/underscore-min.js\" type=\"text/javascript\"></script>");
+//            writer.Write("<script src=\"femah.axd/assets/libs/backbone.js/_0._9._2/backbone-min.js\" type=\"text/javascript\"></script>");
 
             writer.Write("<script src=\"femah.axd/assets/app/app.js\" type=\"text/javascript\"></script>");
             writer.Write("<script src=\"femah.axd/assets/app/features.js\" type=\"text/javascript\"></script>");

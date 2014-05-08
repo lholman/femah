@@ -1,28 +1,4 @@
-﻿function shortenFeatureTypeName(featureType) {
-    return featureType.replace("Femah.Core.FeatureSwitchTypes.", "").replace(", Femah.Core, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null", "");
-};
-
-Femah.FeatureSwitchType = Backbone.Model.extend({
-});
-
-Femah.FeatureSwitchTypeCollection = Backbone.Collection.extend({
-    model: Femah.FeatureSwitchType,
-    url: '/femah.axd/api/featureswitchtypes'
-});
-
-Femah.FeatureSwitchTypeCollection2 = Backbone.Collection.extend({
-    model: Femah.FeatureSwitchType,
-});
-
-Femah.FeatureSwitch = Backbone.Model.extend({
-});
-
-Femah.FeatureSwitchCollection = Backbone.Collection.extend({
-    model: Femah.FeatureSwitch,
-    url: '/femah.axd/api/featureswitches'
-});
-
-//Femah.FeatureSwitchTypeView = Backbone.View.extend({
+﻿//Femah.FeatureSwitchTypeView = Backbone.View.extend({
 //    tagName: "li",
 //    render: function() {
 //        var template = $("#featureswitchtypes-list-template").html();
@@ -52,12 +28,59 @@ Femah.FeatureSwitchCollection = Backbone.Collection.extend({
 //    }
 //});
 
+function shortenFeatureTypeName(featureType) {
+    return featureType.replace("Femah.Core.FeatureSwitchTypes.", "").replace(", Femah.Core, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null", "");
+};
+
+Femah.FeatureSwitchType = Backbone.Model.extend({
+});
+
+Femah.FeatureSwitchTypeCollection = Backbone.Collection.extend({
+    model: Femah.FeatureSwitchType,
+    url: '/femah.axd/api/featureswitchtypes',
+    comparator: function (collection) {
+        return (collection.get('Name'));
+    }
+});
+
+Femah.FeatureSwitch = Backbone.Model.extend({
+    url: function() {
+        return "/femah.axd/api/featureswitches/" + this.id;
+    },
+    idAttribute: "Name"
+});
+
+Femah.FeatureSwitchCollection = Backbone.Collection.extend({
+    model: Femah.FeatureSwitch,
+    url: '/femah.axd/api/featureswitches',
+    comparator: function (collection) {
+        return (collection.get('Name'));
+    }
+});
+
 Femah.FeatureSwitchView = Backbone.View.extend({
+    tagName: "tr",
     initialize: function(options) {
         this.options = options || {};
-    },
-    tagName: "tr",
+        //_.bindAll(this, this.render);
+        //this.model.on("change", this.render, this);
+        this.listenTo(this.model, "change", this.render);
+//        this.listenTo(this.model, "add", this.render);
+//        this.listenTo(this.model, "reset", this.render);
+//        this.listenTo(this.model, "all", this.render);
 
+    },
+    events: {
+        "submit form": "updateFeatureSwitch"
+    },
+    updateFeatureSwitch: function(event) {
+        event.preventDefault();
+        var enabledStatus = $("#featureswitch-status-enabled").val();
+        this.model.set({ IsEnabled: enabledStatus });
+        this.model.save();
+        //this.render();
+        return this;
+    },
     render: function () {
         this.featureTypesList = this.options.featureTypesList;
 
@@ -70,10 +93,10 @@ Femah.FeatureSwitchView = Backbone.View.extend({
 
 Femah.FeatureSwitchesView = Backbone.View.extend({
     initialize: function() {
-        this.collection.bind("reset", this.render, this);
-        this.collection.bind("add", this.render, this);
-        this.collection.bind("remove", this.render, this);
-
+        this.listenTo(this.collection, "reset", this.render);
+        this.listenTo(this.collection, "change", this.render);
+        this.listenTo(this.collection, "add", this.render);
+        this.listenTo(this.collection, "remove", this.render);
     },
     tagName: "table",
     render: function () {

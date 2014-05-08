@@ -95,6 +95,14 @@
   <ItemGroup>
     <EmbeddedResource Include="UI\assets\libs\underscore.js\1.3.3\underscore-min.js" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="UI\assets\libs\backbone.js\1.1.2\backbone-min.js" />
+    <EmbeddedResource Include="UI\assets\libs\backbone.js\1.1.2\backbone.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="UI\assets\libs\underscore.js\1.6.0\underscore-min.js" />
+    <EmbeddedResource Include="UI\assets\libs\underscore.js\1.6.0\underscore.js" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
