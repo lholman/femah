@@ -1,34 +1,4 @@
-﻿//Femah.FeatureSwitchTypeView = Backbone.View.extend({
-//    tagName: "li",
-//    render: function() {
-//        var template = $("#featureswitchtypes-list-template").html();
-//        var compiled = _.template(template, this.model.toJSON());
-//        $(this.el).html(compiled);
-//        return this;
-//    }
-//});
-//
-//Femah.FeatureSwitchTypesView = Backbone.View.extend({
-//    initialize: function () {
-//        this.collection.bind("reset", this.render, this);
-//        this.collection.bind("add", this.render, this);
-//        this.collection.bind("remove", this.render, this);
-// 
-//    },
-//    tagName: "ul",
-//    render: function () {
-//        var els = [];
-//        this.collection.each(function (item) {
-//            var itemView = new Femah.FeatureSwitchTypeView({ model: item });
-//            els.push(itemView.render().el);
-//        });
-//        //return this;
-//        $(this.el).html(els);
-//        $("#featureswitchtypes-list").html(this.el);
-//    }
-//});
-
-function shortenFeatureTypeName(featureType) {
+﻿function shortenFeatureTypeName(featureType) {
     return featureType.replace("Femah.Core.FeatureSwitchTypes.", "").replace(", Femah.Core, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null", "");
 };
 
@@ -60,33 +30,40 @@ Femah.FeatureSwitchCollection = Backbone.Collection.extend({
 
 Femah.FeatureSwitchView = Backbone.View.extend({
     tagName: "tr",
+    
+    template: _.template($("#featureswitches-list-template").html()),
+
+    events: {
+        //"submit form": "updateFeatureSwitch",
+        "click .toggle": "toggleFeatureState",
+    },
+
     initialize: function(options) {
         this.options = options || {};
-        //_.bindAll(this, this.render);
-        //this.model.on("change", this.render, this);
         this.listenTo(this.model, "change", this.render);
 //        this.listenTo(this.model, "add", this.render);
 //        this.listenTo(this.model, "reset", this.render);
 //        this.listenTo(this.model, "all", this.render);
 
     },
-    events: {
-        "submit form": "updateFeatureSwitch"
+    render: function () {
+        this.featureTypesList = this.options.featureTypesList;
+
+        //this.template = $("#featureswitches-list-template").html();
+        //var compiled = _.template(this.template);
+        this.$el.html(this.template({ model: this.model.toJSON(), featureTypes: this.featureTypesList }));
+        return this;
     },
     updateFeatureSwitch: function(event) {
         event.preventDefault();
         var enabledStatus = $("#featureswitch-status-enabled").val();
         this.model.set({ IsEnabled: enabledStatus });
         this.model.save();
-        //this.render();
         return this;
     },
-    render: function () {
-        this.featureTypesList = this.options.featureTypesList;
-
-        this.template = $("#featureswitches-list-template").html();
-        var compiled = _.template(this.template);
-        this.$el.html(compiled({ model: this.model.toJSON(), featureTypes: this.featureTypesList }));
+    toggleFeatureState: function () {
+        this.model.set({ IsEnabled: !this.model.IsEnabled });
+        this.model.save();
         return this;
     }
 });
@@ -97,8 +74,20 @@ Femah.FeatureSwitchesView = Backbone.View.extend({
         this.listenTo(this.collection, "change", this.render);
         this.listenTo(this.collection, "add", this.render);
         this.listenTo(this.collection, "remove", this.render);
+        this.listenTo(this.collection, 'reset', this.addAll);
     },
-    tagName: "table",
+    //tagName: "table",
+    el: $("#featureswitches-app"),
+
+    addOne: function (todo) {
+        var view = new TodoView({ model: todo });
+        this.$("#todo-list").append(view.render().el);
+    },
+
+    addAll: function () {
+        this.collection.each(this.addOne, this);
+    },
+
     render: function () {
         var els = [];
         var featureTypesList = Femah.featureSwitchTypes.toJSON();
@@ -108,7 +97,7 @@ Femah.FeatureSwitchesView = Backbone.View.extend({
         });
 
         //return this;
-        $(this.el).html(els);
-        $("#featureswitches-list").html(this.el);
+        //$(this.el).html(els);
+       // $("#featureswitches-list").html(this.el);
     }
 });

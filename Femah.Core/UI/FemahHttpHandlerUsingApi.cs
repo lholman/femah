@@ -44,15 +44,15 @@ namespace Femah.Core.UI
                 string name;
                 switch (action)
                 {
-                    case _enableFeatureAction:
-                        name = context.Request.QueryString["name"];
-                        var enabled = context.Request.QueryString["enabled"];
-                        bool doEnable;
-                        if (name != null && enabled != null && Boolean.TryParse(enabled, out doEnable))
-                        {
-                            Femah.EnableFeature(name, doEnable);
-                        }
-                        break;
+//                    case _enableFeatureAction:
+//                        name = context.Request.QueryString["name"];
+//                        var enabled = context.Request.QueryString["enabled"];
+//                        bool doEnable;
+//                        if (name != null && enabled != null && Boolean.TryParse(enabled, out doEnable))
+//                        {
+//                            Femah.EnableFeature(name, doEnable);
+//                        }
+//                        break;
 
                     case _setSwitchTypeAction:
                         name = context.Request.QueryString["name"];
@@ -114,10 +114,20 @@ namespace Femah.Core.UI
 
             // Write page header.
             writer.RenderBeginTag(HtmlTextWriterTag.Body);
-            writer.RenderBeginTag(HtmlTextWriterTag.H1);
-            writer.Write("FEMAH");
-            writer.RenderEndTag(/* H1 */);
+            writer.AddAttribute(HtmlTextWriterAttribute.Id, "featureswitches-app");
+            writer.RenderBeginTag(HtmlTextWriterTag.Div);
+                writer.RenderBeginTag(HtmlTextWriterTag.H1);
+                    writer.Write("FEMAH");
+                writer.RenderEndTag(/* H1 */);
 
+                writer.AddAttribute(HtmlTextWriterAttribute.Id, "main");
+                writer.RenderBeginTag("section");
+                    writer.AddAttribute(HtmlTextWriterAttribute.Id, "featureswitches-list");
+                    writer.RenderBeginTag(HtmlTextWriterTag.Table);
+                    writer.RenderEndTag(/* Table */);
+                writer.RenderEndTag(/* section - main */);
+                
+            writer.RenderEndTag(/* Div - featureswitches-app */);
             // Render all feature switches.
             var features = Femah.AllFeatures();
             if (features.Count == 0)
@@ -128,10 +138,11 @@ namespace Femah.Core.UI
             }
             else
             {
-                writer.AddAttribute(HtmlTextWriterAttribute.Id, "featureswitches-list");
-                writer.RenderBeginTag(HtmlTextWriterTag.Div);
+                
+                
+                
                 writer.Write("<script type=\"text/html\" id=\"featureswitches-list-template\">");
-                writer.RenderBeginTag(HtmlTextWriterTag.Tr);
+                
                     writer.RenderBeginTag(HtmlTextWriterTag.Td);
                         writer.Write("<%= model.Name %>");
                     writer.RenderEndTag(/* Td */);
@@ -170,6 +181,15 @@ namespace Femah.Core.UI
                         writer.RenderEndTag(/* Form */);
                     writer.RenderEndTag(/* Td */);
 
+                    // Enabled or disabled. TAKE 2"
+                    writer.RenderBeginTag(HtmlTextWriterTag.Td);
+                        writer.AddAttribute("class", "toggle");
+                        writer.AddAttribute("type", "checkbox");
+                        //writer.AddAttribute("<%= model.IsEnabled ? 'checked='checked'' : '' %>", "");
+                        writer.RenderBeginTag(HtmlTextWriterTag.Input);
+                        writer.RenderEndTag(/* Input */);
+                    writer.RenderEndTag(/* Td */);
+
                     // Custom attributes.
                     writer.RenderBeginTag(HtmlTextWriterTag.Td);
                         writer.RenderBeginTag(HtmlTextWriterTag.Form);
@@ -179,12 +199,11 @@ namespace Femah.Core.UI
                             //TODO: How do we do this, look up feature switch by name maybe?
                         writer.RenderEndTag(/* Form*/);
                     writer.RenderEndTag(/* Td */);
-
-                writer.RenderEndTag(/* Tr */);
                 writer.Write("</script>");
-                writer.RenderEndTag(/* Div */);
-            
+                
             }
+
+            
 
             //Note, a wonderful convention of escaping numbers with an underscore is required in Manifest Resource names (i.e. embedded 
             //resources) retrieved in this way, we could pass this dynamically but I figure it's better to keep it obvious in the script references.
